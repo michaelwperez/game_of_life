@@ -23,7 +23,7 @@ class _GameOfLifePageState extends State<GameOfLifePage> {
   var isPlaying = false;
   int width = 30;
   int height = 30;
-  List<List<GridItem>> gridItems = [];
+  List<List<Cell>> gridItems = [];
 
   @override
   void initState() {
@@ -33,9 +33,9 @@ class _GameOfLifePageState extends State<GameOfLifePage> {
 
   void initializeGrid() {
     for (int i = 0; i < width; i++) {
-      List<GridItem> row = [];
+      List<Cell> row = [];
       for (int j = 0; j < height; j++) {
-        row.add(GridItem(x: i, y: j, living: false, neighbors: 0));
+        row.add(Cell(x: i, y: j, living: false, neighbors: 0));
       }
       gridItems.add(row);
     }
@@ -54,11 +54,11 @@ class _GameOfLifePageState extends State<GameOfLifePage> {
       return;
     }
 
-    List<List<GridItem>> newGrid = List.generate(
+    List<List<Cell>> newGrid = List.generate(
       height,
       (i) => List.generate(
         width,
-        (j) => GridItem(
+        (j) => Cell(
             x: i,
             y: j,
             living: gridItems[i][j].living,
@@ -70,7 +70,7 @@ class _GameOfLifePageState extends State<GameOfLifePage> {
     for (int i = 0; i < height; i++) {
       for (int j = 0; j < width; j++) {
         bool hasChanged = false;
-        GridItem cell = gridItems[i][j];
+        Cell cell = gridItems[i][j];
         //if living cell  has 0-1 or 4+ neighbors, kill it
         if (cell.living && (cell.neighbors <= 1 || cell.neighbors >= 4)) {
           newGrid[i][j].living = false;
@@ -90,7 +90,7 @@ class _GameOfLifePageState extends State<GameOfLifePage> {
       gridItems = newGrid;
     });
 
-    Future.delayed(Duration(milliseconds: 500), () {
+    Future.delayed(Duration(milliseconds: 300), () {
       gameLoop();
     });
   }
@@ -145,7 +145,7 @@ class SquaresGrid extends StatefulWidget {
   bool isPlaying;
   int width;
   int height;
-  List<List<GridItem>> gridItems;
+  List<List<Cell>> gridItems;
   SquaresGrid(
       {required this.isPlaying,
       required this.gridItems,
@@ -158,7 +158,8 @@ class SquaresGrid extends StatefulWidget {
 class _SquaresGridState extends State<SquaresGrid> {
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
+    return Scrollbar(
+    child: GridView.builder(
       itemCount: widget.width * widget.height,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: widget.width,
@@ -186,7 +187,7 @@ class _SquaresGridState extends State<SquaresGrid> {
           ),
         );
       },
-    );
+    ));
   }
 
   void handleCellTap(int row, int col) {
@@ -224,23 +225,23 @@ class _SquaresGridState extends State<SquaresGrid> {
   }
 }
 
-class GridItem extends StatefulWidget {
+class Cell extends StatefulWidget {
   int x;
   int y;
   bool living = false;
   int neighbors = 0;
 
-  GridItem(
+  Cell(
       {required this.x,
       required this.y,
       required this.living,
       required this.neighbors});
 
   @override
-  _GridItemState createState() => _GridItemState();
+  _CellState createState() => _CellState();
 }
 
-class _GridItemState extends State<GridItem> {
+class _CellState extends State<Cell> {
   Color _containerColor = Colors.grey;
 
   void _changeColor() {
