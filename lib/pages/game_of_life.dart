@@ -1,5 +1,5 @@
 import 'dart:core';
-import 'dart:html';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +7,8 @@ import '../main.dart';
 
 class MyColors {
   static const Color Peach = Color(0xFFd98c86);
+  static const Color Teal = Color(0xFF4caeb3);
+  static const Color DarkTeal = Color(0xFF204648);
 }
 
 class GameOfLifePage extends StatefulWidget {
@@ -19,8 +21,8 @@ class GameOfLifePage extends StatefulWidget {
 class _GameOfLifePageState extends State<GameOfLifePage> {
   var fabText = 'Start';
   var isPlaying = false;
-  int width = 10; 
-  int height = 10;
+  int width = 30; 
+  int height = 30;
   List<List<GridItem>> gridItems = [];
 
     @override
@@ -61,22 +63,26 @@ class _GameOfLifePageState extends State<GameOfLifePage> {
     ),
   );
     //play
+    
     for(int i = 0; i < height; i++) {
       for(int j = 0; j < width; j++) {
+        bool hasChanged = false;
+        GridItem cell = gridItems[i][j];
             //if living cell  has 0-1 or 4+ neighbors, kill it
-        if (gridItems[i][j].living && (gridItems[i][j].neighbors <= 1 || gridItems[i][j].neighbors >= 4)) {
+        if (cell.living && (cell.neighbors <= 1 || cell.neighbors >= 4)) {
           newGrid[i][j].living = false;
+          hasChanged = true;
         } //if dead cell has exactly 3 neighbors, make it alive
-        else if (!gridItems[i][j].living && gridItems[i][j].neighbors == 3) {
+        else if (!cell.living && cell.neighbors == 3) {
           newGrid[i][j].living = true;
+          hasChanged = true;
         }
-        else {
-          newGrid[i][j].living = gridItems[i][j].living;
-          newGrid[i][j].neighbors = gridItems[i][j].neighbors;
-        }
-      incrementDecrementNeighbors(newGrid, i, j, newGrid[i][j].living);
-    }
 
+        if(hasChanged) {
+          incrementDecrementNeighbors(newGrid, i, j, newGrid[i][j].living);
+        }
+      }
+    }
     setState(() {
       gridItems = newGrid;
     });
@@ -84,31 +90,31 @@ class _GameOfLifePageState extends State<GameOfLifePage> {
     Future.delayed(Duration(milliseconds: 500), () {
       gameLoop();
     });
-  }
+
   }
 
   incrementDecrementNeighbors(grid, row, col, isLiving) {
- for (int i = -1; i < 2; i++) {
-    for (int j = -1; j < 2; j++) {
-      // Skip the center cell itself
-      if (i == 0 && j == 0) {
-        continue;
-      }
+    for (int i = -1; i < 2; i++) {
+        for (int j = -1; j < 2; j++) {
+          // Skip the center cell itself
+          if (i == 0 && j == 0) {
+            continue;
+          }
 
-      int newRow = row + i;
-      int newCol = col + j;
+          int newRow = row + i;
+          int newCol = col + j;
 
-      // Check bounds
-      if (newRow >= 0 && newRow < grid.length && newCol >= 0 && newCol < grid[0].length) {
-        if (isLiving) {
-          grid[newRow][newCol].neighbors++;
-        } else {
-          grid[newRow][newCol].neighbors--;
+          // Check bounds
+          if (newRow >= 0 && newRow < grid.length && newCol >= 0 && newCol < grid[0].length) {
+            if (isLiving) {
+              grid[newRow][newCol].neighbors++;
+            } else {
+              grid[newRow][newCol].neighbors--;
+            }
+          }
         }
       }
     }
-  }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -159,11 +165,11 @@ class _SquaresGridState extends State<SquaresGrid> {
           },
           child: Container(
             color: widget.gridItems[row][col].living
-                ? MyColors.Peach
-                : Colors.grey,
+                ? MyColors.Teal
+                : MyColors.DarkTeal,
             width: 8,
             height: 8,
-            margin: EdgeInsets.all(1),
+            margin: EdgeInsets.all(.5),
             child: Center(
               child: Text(getCellText(row, col)),
             ),
@@ -174,9 +180,6 @@ class _SquaresGridState extends State<SquaresGrid> {
   }
 
   void handleCellTap(int row, int col) {
-    if (widget.isPlaying) {
-      return;
-    }
     widget.gridItems[row][col].living = !widget.gridItems[row][col].living;
     bool isLiving = widget.gridItems[row][col].living;
     for (int i = -1; i < 2; i++) {
@@ -195,11 +198,11 @@ class _SquaresGridState extends State<SquaresGrid> {
   }
 
   String getCellText(int row, int col) {
-    bool isDebug = true;
+    bool isDebug = false;
     if (widget.gridItems.isEmpty)
     return '';
     if (isDebug) {
-      return '(${widget.gridItems[row][col].x}, ${widget.gridItems[row][col].y}, ${widget.gridItems[row][col].neighbors})';
+      return '${widget.gridItems[row][col].neighbors}';
     }
       return '';
   }
@@ -222,7 +225,7 @@ class _GridItemState extends State<GridItem> {
 
   void _changeColor() {
     setState(() {
-      _containerColor = widget.living ? MyColors.Peach : Colors.grey;
+      _containerColor = widget.living ? MyColors.Teal :MyColors.DarkTeal;
     });
   }
 
